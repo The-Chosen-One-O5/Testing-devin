@@ -68,8 +68,17 @@ class MessageScheduler:
             # Check if current time matches scheduled time (within 1 minute window)
             if (local_time.hour == schedule_hour and 
                 local_time.minute == schedule_minute):
-                return True
                 
+                # For repeating messages, check the end date
+                if msg_config.get('message_type') == 'repeating':
+                    end_date_str = msg_config.get('end_date')
+                    if end_date_str:
+                        end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
+                        if local_time.date() >= end_date:
+                            return False # Stop sending after the end date
+                
+                return True
+            
             return False
             
         except Exception as e:
@@ -86,6 +95,8 @@ class MessageScheduler:
                 message = self._format_daily_message(msg_config)
             elif message_type == 'countdown':
                 message = self._format_countdown_message(msg_config)
+            elif message_type == 'repeating':
+                message = self._format_repeating_message(msg_config)
             else:
                 message = msg_config['message_template']
             
@@ -148,6 +159,19 @@ class MessageScheduler:
             logging.error(f"Error formatting countdown message: {e}")
             return f"⏰ Countdown: {msg_config.get('title', 'Event')}"
     
+    def _format_repeating_message(self, msg_config: Dict) -> str:
+        """Formats a repeating message, checking the end date."""
+        try:
+            end_date_str = msg_config.get('end_date')
+            if end_date_str:
+                end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
+                # We already checked if we should send today in _should_send_message
+                return self._format_daily_message(msg_config)
+            return "" # Should not happen if logic is correct
+        except Exception as e:
+            logging.error(f"Error formatting repeating message: {e}")
+            return ""
+
     def add_daily_message(self, chat_id: int, time_str: str, message: str) -> bool:
         """Add a daily scheduled message"""
         try:
@@ -190,6 +214,27 @@ class MessageScheduler:
             logging.error(f"Error adding countdown message: {e}")
             return False
     
+    def add_repeating_message(self, chat_id: int, time_str: str, end_date: str, message: str) -> bool:
+        """Add a repeating message with an end date"""
+        try:
+            # Validate time and date formats
+            datetime.strptime(time_str, '%H:%M')
+            datetime.strptime(end_date, '%Y-%m-%d')
+            
+            return self.db.add_scheduled_message(
+                chat_id=chat_id,
+                message_type='repeating',
+                schedule_time=time_str,
+                message_template=message,
+                end_date=end_date
+            )
+        except ValueError as e:
+            logging.error(f"Invalid date/time format for repeating message: {e}")
+            return False
+        except Exception as e:
+            logging.error(f"Error adding repeating message: {e}")
+            return False
+
     def get_group_schedules(self, chat_id: int) -> List[Dict]:
         """Get all scheduled messages for a group"""
         return self.db.get_scheduled_messages(chat_id)

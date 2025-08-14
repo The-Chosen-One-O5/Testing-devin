@@ -30,10 +30,11 @@ class BotDatabase:
                     CREATE TABLE IF NOT EXISTS scheduled_messages (
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
                         chat_id INTEGER,
-                        message_type TEXT, -- 'daily', 'countdown'
+                        message_type TEXT, -- 'daily', 'countdown', 'repeating'
                         schedule_time TEXT, -- HH:MM format
                         message_template TEXT,
                         target_date TEXT, -- For countdown messages
+                        end_date TEXT, -- For repeating messages
                         title TEXT, -- For countdown messages
                         is_active BOOLEAN DEFAULT 1,
                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -76,16 +77,16 @@ class BotDatabase:
             return False
     
     def add_scheduled_message(self, chat_id: int, message_type: str, schedule_time: str, 
-                            message_template: str, target_date: str = None, title: str = None) -> bool:
+                            message_template: str, target_date: str = None, title: str = None, end_date: str = None) -> bool:
         """Add a scheduled message"""
         try:
             with sqlite3.connect(self.db_path) as conn:
                 cursor = conn.cursor()
                 cursor.execute('''
-                    INSERT INTO scheduled_messages 
-                    (chat_id, message_type, schedule_time, message_template, target_date, title)
-                    VALUES (?, ?, ?, ?, ?, ?)
-                ''', (chat_id, message_type, schedule_time, message_template, target_date, title))
+                    INSERT INTO scheduled_messages
+                    (chat_id, message_type, schedule_time, message_template, target_date, title, end_date)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                ''', (chat_id, message_type, schedule_time, message_template, target_date, title, end_date))
                 conn.commit()
                 logging.info(f"Added scheduled message for group {chat_id}")
                 return True
