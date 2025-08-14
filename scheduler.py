@@ -182,7 +182,10 @@ class MessageScheduler:
                 chat_id=chat_id,
                 message_type='daily',
                 schedule_time=time_str,
-                message_template=message
+                message_template=message,
+                target_date=None,
+                title=None,
+                end_date=None
             )
         except ValueError:
             logging.error(f"Invalid time format: {time_str}")
@@ -205,7 +208,8 @@ class MessageScheduler:
                 schedule_time=time_str,
                 message_template='',  # Template is generated dynamically
                 target_date=target_date,
-                title=title
+                title=title,
+                end_date=None
             )
         except ValueError as e:
             logging.error(f"Invalid date/time format: {e}")
@@ -226,6 +230,8 @@ class MessageScheduler:
                 message_type='repeating',
                 schedule_time=time_str,
                 message_template=message,
+                target_date=None,
+                title=None,
                 end_date=end_date
             )
         except ValueError as e:
