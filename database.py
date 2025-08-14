@@ -76,28 +76,22 @@ class BotDatabase:
             logging.error(f"Error adding group: {e}")
             return False
     
-    def add_scheduled_message(self, chat_id: int, message_type: str, schedule_time: str,
-                                message_template: str, target_date: Optional[str] = None,
-                                title: Optional[str] = None, end_date: Optional[str] = None) -> bool:
+    def add_scheduled_message(self, chat_id: int, message_type: str, schedule_time: str, 
+                            message_template: str, target_date: str = None, title: str = None, end_date: str = None) -> bool:
         """Add a scheduled message"""
         try:
             with sqlite3.connect(self.db_path) as conn:
                 cursor = conn.cursor()
-
-                # Base query and parameters
-                query = '''
+                cursor.execute('''
                     INSERT INTO scheduled_messages
                     (chat_id, message_type, schedule_time, message_template, target_date, title, end_date)
                     VALUES (?, ?, ?, ?, ?, ?, ?)
-                '''
-                params = (chat_id, message_type, schedule_time, message_template, target_date, title, end_date)
-
-                cursor.execute(query, params)
+                ''', (chat_id, message_type, schedule_time, message_template, target_date, title, end_date))
                 conn.commit()
-                logging.info(f"Added scheduled message for group {chat_id} of type {message_type}")
+                logging.info(f"Added scheduled message for group {chat_id}")
                 return True
         except Exception as e:
-            logging.error(f"Error adding scheduled message for group {chat_id}: {e}")
+            logging.error(f"Error adding scheduled message: {e}")
             return False
     
     def get_scheduled_messages(self, chat_id: int = None) -> List[Dict]:
