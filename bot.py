@@ -51,6 +51,7 @@ class TelegramSchedulerBot:
         self.application.add_handler(CommandHandler("setschedule", self.set_schedule_command))
         self.application.add_handler(CommandHandler("setcountdown", self.set_countdown_command))
         self.application.add_handler(CommandHandler("setrepeating", self.set_repeating_command))
+        self.application.add_handler(CommandHandler("setrecurring", self.set_repeating_command))
         self.application.add_handler(CommandHandler("status", self.status_command))
         self.application.add_handler(CommandHandler("removeschedule", self.remove_schedule_command))
         self.application.add_handler(CommandHandler("settimezone", self.set_timezone_command))
@@ -80,6 +81,7 @@ class TelegramSchedulerBot:
                         f"<b>Available Commands:</b>\n"
                         f"• /setschedule - Set daily messages\n"
                         f"• /setcountdown - Set countdown messages\n"
+                        f"• /setrepeating - Set repeating messages\n"
                         f"• /status - View current schedules\n"
                         f"• /help - Show detailed help\n\n"
                         f"<i>Note: Only group admins can configure schedules.</i>"
@@ -114,6 +116,8 @@ class TelegramSchedulerBot:
             "  Example: <code>/setschedule 09:00 Good morning team! 🌅</code>\n\n"
             "• <code>/setcountdown HH:MM YYYY-MM-DD title</code> - Set countdown\n"
             "  Example: <code>/setcountdown 10:00 2024-12-31 New Year</code>\n\n"
+            "• <code>/setrepeating HH:MM YYYY-MM-DD message</code> - Set repeating message until a date\n"
+            "  Example: <code>/setrepeating 08:00 2025-01-04 Good morning!</code>\n\n"
             "• <code>/setrepeating HH:MM YYYY-MM-DD message</code> - Set repeating message until a date\n"
             "  Example: <code>/setrepeating 08:00 2025-01-04 Good morning!</code>\n\n"
             "• <code>/status</code> - View all scheduled messages\n"
@@ -334,15 +338,15 @@ class TelegramSchedulerBot:
                     status_text += f"   🎯 {title}\n"
                     status_text += f"   ⏰ {time}\n\n"
            
-           elif msg_type == 'repeating':
-               message_preview = schedule['message_template'][:50]
-               if len(schedule['message_template']) > 50:
-                   message_preview += "..."
-               end_date = schedule.get('end_date', 'N/A')
-               status_text += f"<b>{i}.</b> Repeating Message (ID: {schedule['id']})\n"
-               status_text += f"   ⏰ {time}\n"
-               status_text += f"   💬 {message_preview}\n"
-               status_text += f"   🛑 Ends On: {end_date}\n\n"
+            elif msg_type == 'repeating':
+                message_preview = schedule['message_template'][:50]
+                if len(schedule['message_template']) > 50:
+                    message_preview += "..."
+                end_date = schedule.get('end_date', 'N/A')
+                status_text += f"<b>{i}.</b> Repeating Message (ID: {schedule['id']})\n"
+                status_text += f"   ⏰ {time}\n"
+                status_text += f"   💬 {message_preview}\n"
+                status_text += f"   🛑 Ends On: {end_date}\n\n"
 
         status_text += f"<i>Use /removeschedule ID to remove a schedule</i>"
         
