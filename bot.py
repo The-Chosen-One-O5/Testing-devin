@@ -48,6 +48,7 @@ class TelegramSchedulerBot:
         # Command handlers
         self.application.add_handler(CommandHandler("start", self.start_command))
         self.application.add_handler(CommandHandler("help", self.help_command))
+        self.application.add_handler(CommandHandler("commands", self.help_command))
         self.application.add_handler(CommandHandler("setschedule", self.set_schedule_command))
         self.application.add_handler(CommandHandler("setcountdown", self.set_countdown_command))
         self.application.add_handler(CommandHandler("setrepeating", self.set_repeating_command))
@@ -83,7 +84,7 @@ class TelegramSchedulerBot:
                         f"• /setcountdown - Set countdown messages\n"
                         f"• /setrepeating - Set repeating messages\n"
                         f"• /status - View current schedules\n"
-                        f"• /help - Show detailed help\n\n"
+                        f"• /help or /commands - Show detailed help\n\n"
                         f"<i>Note: Only group admins can configure schedules.</i>"
                     )
                 else:
