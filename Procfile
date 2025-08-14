@@ -1,2 +1,2 @@
-web: gunicorn bot:app
-worker: python scheduler.py
+web: python bot.py
+worker: python bot.py
