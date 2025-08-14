@@ -1,12 +1,21 @@
 import os
 import logging
 import asyncio
+import threading
 from datetime import datetime
 from dotenv import load_dotenv
 from telegram import Update, Bot
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 from telegram.constants import ChatType
 import pytz
+
+# Flask for web server (to prevent Render sleeping)
+try:
+    from flask import Flask
+    FLASK_AVAILABLE = True
+except ImportError:
+    FLASK_AVAILABLE = False
+    print("Flask not available - web server disabled")
 
 from database import BotDatabase
 from scheduler import MessageScheduler
@@ -416,9 +425,38 @@ class TelegramSchedulerBot:
             await self.application.stop()
             await self.application.shutdown()
 
+# Flask web server for Render (prevents sleeping)
+if FLASK_AVAILABLE:
+    app = Flask(__name__)
+    
+    @app.route('/')
+    def home():
+        return "🤖 Telegram Scheduler Bot is running!"
+    
+    @app.route('/health')
+    def health():
+        return {"status": "OK", "message": "Bot is healthy"}
+    
+    @app.route('/ping')
+    def ping():
+        return "pong"
+    
+    def run_web_server():
+        """Run Flask web server in background"""
+        port = int(os.environ.get('PORT', 10000))
+        app.run(host='0.0.0.0', port=port, debug=False, use_reloader=False)
+
 def main():
     """Main function"""
     try:
+        # Start web server in background thread (for Render)
+        if FLASK_AVAILABLE and os.environ.get('PORT'):
+            logger.info("Starting web server for Render deployment...")
+            web_thread = threading.Thread(target=run_web_server, daemon=True)
+            web_thread.start()
+            logger.info(f"Web server started on port {os.environ.get('PORT', 10000)}")
+        
+        # Start the Telegram bot
         bot = TelegramSchedulerBot()
         asyncio.run(bot.run())
     except KeyboardInterrupt:
