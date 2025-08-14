@@ -118,8 +118,6 @@ class TelegramSchedulerBot:
             "  Example: <code>/setcountdown 10:00 2024-12-31 New Year</code>\n\n"
             "• <code>/setrepeating HH:MM YYYY-MM-DD message</code> - Set repeating message until a date\n"
             "  Example: <code>/setrepeating 08:00 2025-01-04 Good morning!</code>\n\n"
-            "• <code>/setrepeating HH:MM YYYY-MM-DD message</code> - Set repeating message until a date\n"
-            "  Example: <code>/setrepeating 08:00 2025-01-04 Good morning!</code>\n\n"
             "• <code>/status</code> - View all scheduled messages\n"
             "• <code>/removeschedule ID</code> - Remove schedule by ID\n"
             "• <code>/settimezone TIMEZONE</code> - Set group timezone\n"
